@@ -77,7 +77,7 @@ const BUSINESS_PLAN_MODIFIER = ({
         title:
           "Use Dub Conversions to track how your link clicks are converting to signups and sales. Limits are based on the total sale amount tracked within a given month.",
         cta: "Learn more.",
-        href: "https://dub.co/help/article/dub-conversions",
+        href: "https://d.to/conversions",
       },
     },
     {
@@ -159,7 +159,7 @@ export const PLANS = [
           title:
             "Get location (country, city, continent), device (type, browser, OS), and referer data on your clicks.",
           cta: "Learn more.",
-          href: "https://dub.co/help/article/dub-analytics",
+          href: "https://dub.co/analytics",
         },
       },
       { id: "ai", text: "10 AI credits/mo" },
