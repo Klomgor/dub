@@ -6,8 +6,8 @@ import {
   AccordionTrigger,
 } from "@dub/ui";
 import { z } from "zod";
-import { BlockMarkdown } from "./BlockMarkdown";
-import { BlockTitle } from "./BlockTitle";
+import { BlockMarkdown } from "./block-markdown";
+import { BlockTitle } from "./block-title";
 
 export function AccordionBlock({
   block,
@@ -15,9 +15,9 @@ export function AccordionBlock({
   block: z.infer<typeof programLanderAccordionBlockSchema>;
 }) {
   return (
-    <div>
+    <div className="space-y-5">
       <BlockTitle title={block.data.title} />
-      <div className="mt-5 border-y border-slate-200">
+      <div className="border-y border-slate-200">
         <Accordion type="multiple">
           {block.data.items.map((item, idx) => (
             <AccordionItem key={idx} value={idx.toString()}>
