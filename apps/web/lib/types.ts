@@ -45,7 +45,7 @@ import {
 import { createOAuthAppSchema, oAuthAppSchema } from "./zod/schemas/oauth";
 import {
   createPartnerSchema,
-  EnrolledPartnerSchemaWithExpandedFields,
+  EnrolledPartnerSchemaExtended,
   PartnerSchema,
 } from "./zod/schemas/partners";
 import {
@@ -119,7 +119,10 @@ export interface RedisLinkProps {
   programId?: string;
   partnerId?: string;
   partner?: Pick<PartnerProps, "id" | "name" | "image">;
-  discount?: Pick<DiscountProps, "id" | "amount" | "type" | "maxDuration">;
+  discount?: Pick<
+    DiscountProps,
+    "id" | "amount" | "type" | "maxDuration" | "couponId" | "couponTestId"
+  >;
   testVariants?: z.infer<typeof ABTestVariantsSchema>;
   testCompletedAt?: Date;
 }
@@ -397,7 +400,7 @@ export type PartnerProfileCustomerProps = z.infer<
 export type PartnerProfileLinkProps = z.infer<typeof PartnerProfileLinkSchema>;
 
 export type EnrolledPartnerProps = z.infer<
-  typeof EnrolledPartnerSchemaWithExpandedFields
+  typeof EnrolledPartnerSchemaExtended
 >;
 
 export type DiscountProps = z.infer<typeof DiscountSchema>;
@@ -462,10 +465,7 @@ export type FolderWithPermissions = {
   permissions: FolderPermission[];
 };
 
-export type FolderSummary = Pick<
-  Folder,
-  "id" | "name" | "accessLevel" | "linkCount"
->;
+export type FolderSummary = Pick<Folder, "id" | "name" | "accessLevel">;
 
 // Rewards
 
