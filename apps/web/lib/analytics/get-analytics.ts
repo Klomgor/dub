@@ -15,6 +15,14 @@ import {
 import { AnalyticsFilters } from "./types";
 import { getStartEndDates } from "./utils/get-start-end-dates";
 
+// Determine the pipe name based on the groupBy parameter
+const determinePipeName = (groupBy: AnalyticsFilters["groupBy"]) => {
+  if (UTM_TAGS_PLURAL_LIST.includes(groupBy)) {
+    return "v2_utms";
+  }
+  return `v2_${groupBy}`;
+};
+
 // Fetch data for /api/analytics
 export const getAnalytics = async (params: AnalyticsFilters) => {
   let {
@@ -94,10 +102,12 @@ export const getAnalytics = async (params: AnalyticsFilters) => {
 
   // Create a Tinybird pipe
   const pipe = tb.buildPipe({
-    pipe: `v2_${UTM_TAGS_PLURAL_LIST.includes(groupBy) ? "utms" : groupBy}`,
+    pipe: determinePipeName(groupBy),
     parameters: analyticsFilterTB,
     data:
-      groupBy === "top_links" || UTM_TAGS_PLURAL_LIST.includes(groupBy)
+      groupBy === "top_links" ||
+      groupBy === "top_partners" ||
+      UTM_TAGS_PLURAL_LIST.includes(groupBy)
         ? z.any()
         : analyticsResponse[groupBy],
   });
@@ -189,6 +199,33 @@ export const getAnalytics = async (params: AnalyticsFilters) => {
         [SINGULAR_ANALYTICS_ENDPOINTS[groupBy]]: item.utm,
       }),
     );
+  } else if (groupBy === "top_partners") {
+    const topPartnersData = response.data as {
+      partnerId: string;
+    }[];
+
+    const partners = await prismaEdge.partner.findMany({
+      where: {
+        id: {
+          in: topPartnersData.map((item) => item.partnerId),
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        country: true,
+        payoutsEnabledAt: true,
+      },
+    });
+
+    return topPartnersData.map((item) => {
+      const partner = partners.find((p) => p.id === item.partnerId);
+      return {
+        ...item,
+        partner,
+      };
+    });
   }
 
   // Return array for other endpoints

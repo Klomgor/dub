@@ -2,14 +2,16 @@
 
 import usePartnerPayouts from "@/lib/swr/use-partner-payouts";
 import usePartnerPayoutsCount from "@/lib/swr/use-partner-payouts-count";
-import usePartnerProfile from "@/lib/swr/use-partner-profile";
 import { PartnerPayoutResponse } from "@/lib/types";
-import { AmountRowItem } from "@/ui/partners/amount-row-item";
+import { PayoutRowMenu } from "@/ui/partners/payout-row-menu";
 import { PayoutStatusBadges } from "@/ui/partners/payout-status-badges";
 import { AnimatedEmptyState } from "@/ui/shared/animated-empty-state";
+import { PayoutStatus } from "@dub/prisma/client";
 import {
   AnimatedSizeContainer,
+  DynamicTooltipWrapper,
   Filter,
+  SimpleTooltipContent,
   StatusBadge,
   Table,
   Tooltip,
@@ -18,17 +20,21 @@ import {
   useTable,
 } from "@dub/ui";
 import { InvoiceDollar, MoneyBill2 } from "@dub/ui/icons";
-import { OG_AVATAR_URL, formatPeriod } from "@dub/utils";
+import {
+  OG_AVATAR_URL,
+  currencyFormatter,
+  formatDate,
+  formatPeriod,
+} from "@dub/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PayoutDetailsSheet } from "./payout-details-sheet";
 import { usePayoutFilters } from "./use-payout-filters";
 
 export function PayoutTable() {
-  const { partner } = usePartnerProfile();
   const { queryParams, searchParams } = useRouterStuff();
 
-  const sortBy = searchParams.get("sortBy") || "periodStart";
+  const sortBy = searchParams.get("sortBy") || "periodEnd";
   const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
 
   const { payouts, error, loading } = usePartnerPayouts();
@@ -59,7 +65,7 @@ export function PayoutTable() {
     error: error ? "Failed to load payouts" : undefined,
     columns: [
       {
-        id: "periodStart",
+        id: "periodEnd",
         header: "Period",
         accessorFn: (d) => formatPeriod(d),
       },
@@ -83,14 +89,45 @@ export function PayoutTable() {
         header: "Status",
         cell: ({ row }) => {
           const badge = PayoutStatusBadges[row.original.status];
+          const tooltip = (() => {
+            if (
+              row.original.status === "failed" &&
+              row.original.failureReason
+            ) {
+              return row.original.failureReason;
+            }
+            if (row.original.status === "pending") {
+              return row.original.amount >= row.original.program.minPayoutAmount
+                ? "This payout will be processed depends on your program's payment schedule, which is usually at the beginning or the end of the month."
+                : `This program's minimum payout amount is ${currencyFormatter(
+                    row.original.program.minPayoutAmount / 100,
+                  )}. This payout will be accrued and processed during the next payout period.`;
+            }
+            return undefined;
+          })();
+
           return badge ? (
             <StatusBadge icon={badge.icon} variant={badge.variant}>
-              {badge.label}
+              <DynamicTooltipWrapper
+                tooltipProps={tooltip ? { content: tooltip } : undefined}
+              >
+                {badge.label}
+              </DynamicTooltipWrapper>
             </StatusBadge>
           ) : (
             "-"
           );
         },
+      },
+      {
+        id: "paidAt",
+        header: "Paid",
+        cell: ({ row }) =>
+          row.original.paidAt
+            ? formatDate(row.original.paidAt, {
+                month: "short",
+              })
+            : "-",
       },
       {
         id: "amount",
@@ -100,7 +137,6 @@ export function PayoutTable() {
             <AmountRowItem
               amount={row.original.amount}
               status={row.original.status}
-              payoutsEnabled={Boolean(partner?.payoutsEnabledAt)}
               minPayoutAmount={row.original.program.minPayoutAmount}
             />
 
@@ -122,9 +158,19 @@ export function PayoutTable() {
           </div>
         ),
       },
+      // Menu
+      {
+        id: "menu",
+        enableHiding: false,
+        minSize: 30,
+        size: 30,
+        maxSize: 30,
+        cell: ({ row }) => <PayoutRowMenu row={row} />,
+      },
     ],
     pagination,
     onPaginationChange: setPagination,
+    sortableColumns: ["periodEnd", "amount", "paidAt"],
     sortBy,
     sortOrder,
     onSortChange: ({ sortBy, sortOrder }) =>
@@ -202,4 +248,41 @@ export function PayoutTable() {
       </div>
     </>
   );
+}
+
+function AmountRowItem({
+  amount,
+  status,
+  minPayoutAmount,
+}: {
+  amount: number;
+  status: PayoutStatus;
+  minPayoutAmount: number;
+}) {
+  const display = currencyFormatter(amount / 100, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  if (status === PayoutStatus.pending && amount < minPayoutAmount) {
+    return (
+      <Tooltip
+        content={
+          <SimpleTooltipContent
+            title={`This program's minimum payout amount is ${currencyFormatter(
+              minPayoutAmount / 100,
+            )}. This payout will be accrued and processed during the next payout period.`}
+            cta="Learn more."
+            href="https://dub.co/help/article/receiving-payouts"
+          />
+        }
+      >
+        <span className="cursor-help truncate text-neutral-400 underline decoration-dotted underline-offset-2">
+          {display}
+        </span>
+      </Tooltip>
+    );
+  }
+
+  return display;
 }

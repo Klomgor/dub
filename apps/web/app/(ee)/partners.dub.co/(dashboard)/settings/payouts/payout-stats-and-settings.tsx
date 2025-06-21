@@ -24,24 +24,14 @@ export function PayoutStatsAndSettings() {
             <div className="text-sm text-neutral-500">Upcoming payouts</div>
           </div>
           {partner && !partner.payoutsEnabledAt && (
-            <ConnectPayoutButton
-              text={
-                partner?.supportedPayoutMethod === "stripe"
-                  ? "Connect Bank Account"
-                  : "Connect PayPal"
-              }
-              className="h-8 w-fit px-3"
-              variant="primary"
-            />
+            <ConnectPayoutButton className="h-8 w-fit px-3" />
           )}
         </div>
         <div className="flex items-end justify-between gap-5">
           <div className="mt-2 flex items-center gap-2">
             {partner && !partner.payoutsEnabledAt && (
               <Tooltip
-                content={`A valid ${
-                  partner.stripeConnectId ? "Stripe" : "PayPal"
-                } connection is required for payouts.`}
+                content="You need to connect your bank account to be able to receive payouts from the programs you are enrolled in."
                 side="right"
               >
                 <div>

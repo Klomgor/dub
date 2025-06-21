@@ -1,7 +1,7 @@
 import { getProgram } from "@/lib/fetchers/get-program";
 import { programLanderSchema } from "@/lib/zod/schemas/program-lander";
-import { PageContent } from "@/ui/layout/page-content";
-import { BLOCK_COMPONENTS } from "@/ui/partners/lander-blocks";
+import { PageContentOld } from "@/ui/layout/page-content";
+import { BLOCK_COMPONENTS } from "@/ui/partners/lander/blocks";
 import { BackLink } from "@/ui/shared/back-link";
 import { MaxWidthWrapper } from "@dub/ui";
 import { notFound } from "next/navigation";
@@ -15,13 +15,15 @@ export default async function ProgramDetailsPage({
 }) {
   const program = await getProgram({
     slug: programSlug,
-    include: ["rewards", "defaultDiscount"],
+    include: ["defaultRewards", "defaultDiscount"],
   });
 
-  if (!program) notFound();
+  if (!program) {
+    notFound();
+  }
 
   return (
-    <PageContent>
+    <PageContentOld>
       <MaxWidthWrapper className="mb-10 mt-4">
         <BackLink href="/programs">Programs</BackLink>
         <div className="mt-8 grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[300px_minmax(0,600px)]">
@@ -58,15 +60,7 @@ export default async function ProgramDetailsPage({
                     .blocks.map((block, idx) => {
                       const Component = BLOCK_COMPONENTS[block.type];
                       return Component ? (
-                        <Component
-                          key={idx}
-                          block={block}
-                          logo={program.logo}
-                          brandColor={program.brandColor}
-                          reward={program.rewards?.find(
-                            (r) => r.id === program.defaultRewardId,
-                          )}
-                        />
+                        <Component key={idx} block={block} program={program} />
                       ) : null;
                     })}
                 </div>
@@ -75,6 +69,6 @@ export default async function ProgramDetailsPage({
           </div>
         </div>
       </MaxWidthWrapper>
-    </PageContent>
+    </PageContentOld>
   );
 }
