@@ -2,7 +2,7 @@
 
 import { getDefaultProgramIdOrThrow } from "@/lib/api/programs/get-default-program-id-or-throw";
 import { sendEmail } from "@dub/email";
-import { PartnerInvite } from "@dub/email/templates/partner-invite";
+import PartnerInvite from "@dub/email/templates/partner-invite";
 import { prisma } from "@dub/prisma";
 import z from "../../zod";
 import { authActionClient } from "../safe-action";
@@ -56,6 +56,7 @@ export const resendProgramInviteAction = authActionClient
           email: partner.email!,
           program: {
             name: program.name,
+            slug: program.slug,
             logo: program.logo,
           },
         }),
