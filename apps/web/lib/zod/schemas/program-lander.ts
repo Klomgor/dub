@@ -62,7 +62,6 @@ export const programLanderEarningsCalculatorBlockSchema =
   programLanderBlockCommonSchema.extend({
     type: z.literal("earnings-calculator"),
     data: z.object({
-      title: programLanderBlockTitleSchema,
       productPrice: z.number(),
     }),
   });
@@ -75,8 +74,16 @@ export const programLanderBlockSchema = z.discriminatedUnion("type", [
   programLanderEarningsCalculatorBlockSchema,
 ]);
 
+export const programLanderRewardsSchema = z.object({
+  saleRewardId: z.string().or(z.literal("none")).optional(),
+  leadRewardId: z.string().or(z.literal("none")).optional(),
+  clickRewardId: z.string().or(z.literal("none")).optional(),
+  discountId: z.string().or(z.literal("none")).optional(),
+});
+
 export const programLanderSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
+  rewards: programLanderRewardsSchema.optional(),
   blocks: z.array(programLanderBlockSchema),
 });

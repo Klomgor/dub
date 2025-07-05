@@ -16,7 +16,7 @@ import {
 import { ReactNode } from "react";
 import { Footer } from "../components/footer";
 
-export function PartnerApplicationApproved({
+export default function PartnerApplicationApproved({
   program = {
     name: "Acme",
     logo: DUB_WORDMARK,
@@ -85,6 +85,7 @@ export function PartnerApplicationApproved({
               1. Find your unique referral links in the{" "}
               <Link
                 href={`https://partners.dub.co/programs/${program.slug}/links`}
+                className="font-semibold text-black underline"
               >
                 Links
               </Link>{" "}
@@ -98,12 +99,16 @@ export function PartnerApplicationApproved({
 
             <Text className="ml-1 text-sm leading-5 text-black">
               3. Track your{" "}
-              <Link href={`https://partners.dub.co/programs/${program.slug}`}>
+              <Link
+                href={`https://partners.dub.co/programs/${program.slug}`}
+                className="font-semibold text-black underline"
+              >
                 link performance
               </Link>{" "}
               and{" "}
               <Link
                 href={`https://partners.dub.co/programs/${program.slug}/earnings`}
+                className="font-semibold text-black underline"
               >
                 earnings
               </Link>{" "}
@@ -113,7 +118,10 @@ export function PartnerApplicationApproved({
             {!partner.payoutsEnabled && (
               <Text className="ml-1 text-sm leading-5 text-black">
                 4. Connect your Stripe account to{" "}
-                <Link href="https://partners.dub.co/settings/payouts">
+                <Link
+                  href="https://dub.co/help/article/receiving-payouts"
+                  className="font-semibold text-black underline"
+                >
                   enable payouts
                 </Link>
                 .
@@ -157,5 +165,3 @@ export function PartnerApplicationApproved({
     </Html>
   );
 }
-
-export default PartnerApplicationApproved;
