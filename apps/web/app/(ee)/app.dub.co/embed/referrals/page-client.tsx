@@ -43,6 +43,7 @@ export function ReferralsEmbedPageClient({
   earnings,
   stats,
   themeOptions,
+  dynamicHeight,
 }: {
   program: Program;
   links: ReferralsEmbedLink[];
@@ -59,6 +60,7 @@ export function ReferralsEmbedPageClient({
     saleAmount: number;
   };
   themeOptions: ThemeOptions;
+  dynamicHeight: boolean;
 }) {
   const resources = programResourcesSchema.parse(
     program.resources ?? { logos: [], colors: [], files: [] },
@@ -113,7 +115,7 @@ export function ReferralsEmbedPageClient({
   return (
     <div
       style={{ backgroundColor: themeOptions.backgroundColor || "transparent" }}
-      className="flex min-h-screen flex-col"
+      className={cn("flex flex-col", !dynamicHeight && "min-h-screen")}
     >
       <div className="relative z-0 p-5">
         <div className="border-border-default relative flex flex-col overflow-hidden rounded-lg border p-4 md:p-6">
@@ -201,7 +203,7 @@ export function ReferralsEmbedPageClient({
           </div>
           <div className="mt-4 flex justify-center md:absolute md:bottom-3 md:right-3 md:mt-0">
             <a
-              href="https://dub.partners"
+              href="https://dub.co/partners"
               target="_blank"
               className="hover:text-content-default text-content-subtle bg-bg-default border-border-subtle flex w-fit items-center gap-1.5 rounded-md border px-2 py-1 transition-colors duration-75"
             >
